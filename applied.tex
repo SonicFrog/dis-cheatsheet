@@ -1,0 +1,265 @@
+\section{Document classification}
+Task: given a set of labelled documents, construct a classifier to
+decide for unlabeled documents.
+
+Features
+\begin{itemize}
+\item Words of the documents
+  \begin{itemize}
+  \item bag of words
+  \item document vector
+  \end{itemize}
+\item More detaild information on words
+  \begin{itemize}
+  \item Phrases
+  \item Word fragments
+  \item Grammatical features
+  \end{itemize}
+\item Any metadata about document and author
+\end{itemize}
+
+\subsection{Challenges}
+The feature space is very high-dimensional
+\begin{itemize}
+\item Vocabulary size
+\item All words bigrams
+\item All character trigrams
+\end{itemize}
+
+Dealing with high-dimensionality
+\begin{itemize}
+\item Feature selection
+\item Dimensionality reduction, e.g.\ word embedding
+\item Classification algorithm that scale well
+\end{itemize}
+
+\subsection{Simple method: kNN}
+use vector space model. \\
+To classify D
+\begin{itemize}
+\item retrieve k nearest neighbors in training set according to vector
+  space model
+\item Choose majority class as the class of D
+\end{itemize}
+
+If k is large: $ \frac{\#C}{k} $ estimates $ P(C \mid D) $ the
+probability that the document has indeed class C
+
+\subsection{Naîve bayes classifier}
+\begin{itemize}
+\item Apply bayes law
+\item Feature: bag of words model: all words and their count in the
+  document
+\item Training:
+  \begin{itemize}
+  \item How characteristic is word w for class C? \\
+    $ P(w \mid C) = \frac{\mid w \in D, D \in C \mid +
+      1}{\sum_{w'}\mid w' \in D, D \in C \mid + 1} $
+  \item How frequent is class C \\
+    $ P(C) = \frac{D \in C}{\mid \Delta \mid} $
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{Using bayes classifier}
+Using bayes law the prob the class is C for D \\
+$ P(C \mid D) \propto P(C) \prod_{w \in D} P(w \mid C) $ \\
+Thus most probable class is\\
+$ C_{NB} = argmax_{C} (log P(C) + \sum_{w \in D} log P(w \mid C)) $
+
+\subsection{Classification using word embeddings}
+
+Probability that word w occurs with context word c \\
+$ P(D = 1 \mid w,c ; \theta) $
+
+Consider instead of (word, context) pairs, (class, paragraph) pairs
+\begin{itemize}
+\item Word w $ \rightarrow $ Class label C
+\item Learn $ P(C \mid p)= \frac{e^{p_v \cdot v_C}}{\sum_{C'} e^{-v_p
+      \cdot v_{C'}}} $ (SGD)
+\item Paragraph feature: $ v_p = \sum_{w \in p} v_w $
+\item Then predict label from paragraph features
+\end{itemize}
+
+\subsection{Fasttext}
+Classifier based on word embeddings \\
+Extensions:
+\begin{itemize}
+\item Using word n-grams (phrases)
+\item Subword information (character n-grams)
+\item Possible to build vectors for unseed words!
+\end{itemize}
+
+\subsection{Document classfication summary}
+Widely studied problem with many applications
+\begin{itemize}
+\item Spam filtering, sentiment analysis, document search
+\item Increasing interest
+  \begin{itemize}
+  \item Powerful methods using very large corpuses
+  \item Information filtering on the internet
+  \end{itemize}
+\end{itemize}
+
+\section{Recommender systems}
+\subsection{Definition}
+Given a user model and a set of items, a recommender system is a
+function that helps to mathc users with items by ranking the in order
+of decreased relevance.
+
+\subsection{Approaches}
+\begin{itemize}
+\item Collaborative: Tell what other people like
+\item Content based: show me more of what I liked
+\end{itemize}
+
+\subsection{Collaborative filtering}
+Widely used approach
+\begin{itemize}
+\item Used by large e-commerce sites
+\item Applicable in many domains
+\item Well understood
+\end{itemize}
+
+Wisdom of the crowd
+\begin{itemize}
+\item Users give ratings to items
+\item Users with similar testes in the past will have similar test in
+  the future
+\end{itemize}
+
+\subsection{User-based collaborative filtering}
+Given a user U and an item I not rated by U, estimate the rating $
+r_U(I) $ by
+\begin{itemize}
+\item Rind a set of users $ N_U $ who liked the same items as U in the
+  past and who have rated I
+\item Aggregate the ratings of I provided by $ N_U $
+\end{itemize}
+
+Compute ratings for all items not rated by U and keep the best-rated
+ones.
+\subsection{Similarity between users}
+Pearson correlation coefficient: \\
+$ sim(x, y) = \frac{\sum_{i = 1}^N (r_x(i) - \mathsf{r_x})(r_y(i) -
+  \mathsf{r_y})}{\sqrt{\sum_{i = 1}^N (r_x(i) - \mathsf{r_x})^2}
+  \sqrt{\sum_{i=1}^N (r_y(i) - \mathsf{r_y})^2}} $ \\
+
+Cosine similarity: \\
+$ sim(x, y) = cos(\theta) = \frac{\sum_{i = 1}^N r_x(i) \cdot r_y(i)
+}{\sqrt{\sum_{i = 1}^N r_x(i)^2} \sqrt{\sum_{i=1}^N r_y(i)^2}} $
+
+\begin{itemize}
+\item x,y :users
+\item N items i rated by both x and y
+\item $ r_x(i) $: rating of user x of item i
+\item $ \mathsf{r_x} $: average ratings of user x
+\end{itemize}
+
+\subsection{Ratings aggregation}
+common function $ r_x(a) = \mathsf{r_x} + \frac{\sum_{y \in N_U(x)}
+  sim(x, y)(r_y(a) - \mathsf{r_y})}{\sum_{y \in N_U(x)} \mid
+  sim(x,y)} $
+\begin{itemize}
+\item $ N_U(x) $:neighbours of user x
+\item $ a $: item not rated by x
+\end{itemize}
+
+The aggregation function calculates whether the ratings of neighbours
+are higher or lower than average. We can consider this as the bias of
+the user y w.r.t.\ item a. The bias is then added/subtracted from
+user's x average rating.
+
+\subsection{User-based collaborative filter}
+Problems
+\begin{itemize}
+\item Cold start: users or items without ratings
+\item Scalability: large numbers of users
+\item Data dispersion: highly variable ratings
+\end{itemize}
+
+Possible solution
+\begin{itemize}
+\item Item-based collaborative filtering
+\end{itemize}
+
+\subsection{Item-based collaborative filtering}
+Use similarity between items not users
+\begin{itemize}
+\item Given a user U and an item I not rated by U, estimate the rating
+  $ r_U(I) $ by
+  \begin{itemize}
+  \item Find a set of items $ N_I $ who are similar to I and that have
+    been rated
+  \item Aggregate the ratings of the items in $ N_I $ and use
+    aggregation as prediction of $ r_U(I) $
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{Aggregate the ratings}
+$ r_x(a) = \frac{\sum_{b \in N_I(a)} sim(a, b) r_x(b)}{\sum_{b \in
+    N_I(a)} \mid sim(a, b) \mid}$
+\begin{itemize}
+\item $ N_I(a) $: neighbours of item $ a $
+\item $ b $: item rated by $ x $
+\end{itemize}
+
+\begin{itemize}
+\item Does not solve the scalability problem but
+\item Calculate all pair-wise item similarities in advance
+\item Items similarities are more stable
+\item The neighborhood $ N_I(a) $ to be considered at runtime is small
+\end{itemize}
+
+\subsection{Content-based recommandation}
+Collaborative filtering needs only ratings, not information about
+items. But item content can provide some useful information. \\
+Given the items that have been rated by user U in the past
+\begin{itemize}
+\item Find the items that are similar to past items
+\item Aggregate ratings of most similar items
+\end{itemize}
+
+Use method from information retrieval to extract content of an
+item. \\
+Given an item and a textual description, compute TF-IDF weights \\
+$ w(t,a) = tf(t, a) \cdot idf(t) = \frac{freq(t,a)}{max_{s \in T}
+  freq(s, a)} log(\frac{N}{n(t)})$
+\begin{itemize}
+\item N: number of items to recommend
+\item n(t): number of items where term t appears
+\end{itemize}
+
+\subsubsection{Similarity between items}
+Cosine similarity
+$ sim(a,b) = cos(\theta) = \frac{\sum_{t = 1}^T w(t,a) \cdot
+  w(t,b)}{\sqrt{\sum_{t = 1}^T w(t,a)^2} \sqrt{\sum_{t=1}^T w(t,b)^2}}
+$
+\begin{itemize}
+\item a, b: items
+\item T: terms t that appear in all items
+\item w(t, a): TF-IDF of term t in item a
+\end{itemize}
+
+\subsubsection{Making predictions}
+
+Given a set of items D that have been rated by the user, find nearest
+neighbours in D of new item a. Use ratings of nearest neighbours to
+predict rating with the aggregation function: \\
+$ r_x(a) = \frac{\sum_{b \in N_I(a)} sim(a, b) r_x(b)}{\sum_{b \in
+    N_I(a)} \mid sim(a, b) \mid} $
+
+\subsection{Discussion of content-based}
+Problems:
+\begin{itemize}
+\item Cold start problem
+\item Content be limited or impossible to extract (non-text)
+\item Tends to recommend more of the same
+\end{itemize}
+
+More scalable: TF-IDF of items can be computed offline
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "master"
+%%% End:

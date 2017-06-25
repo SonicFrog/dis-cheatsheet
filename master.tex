@@ -1,0 +1,74 @@
+\documentclass[10pt, landscape, a4paper]{article}
+\usepackage{multicol}
+\usepackage{ifthen}
+\usepackage[landscape]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{newclude}
+
+\usepackage{amsmath,amsthm,amsfonts,amssymb}
+\usepackage{color,graphicx,overpic}
+
+\author{Ogier Bouvier}
+\date {June 2017}
+\title{Distributed Information Systems}
+
+\ifthenelse{\lengthtest { \paperwidth = 11in}}
+{ \geometry{top=.5in,left=.5in,right=.5in,bottom=.5in} }
+{\ifthenelse{ \lengthtest{ \paperwidth = 297mm}}
+  {\geometry{top=1cm,left=1cm,right=1cm,bottom=1cm} }
+  {\geometry{top=1cm,left=1cm,right=1cm,bottom=1cm} }
+}
+
+\pagestyle{empty}
+
+% Redefine section commands to use less space
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{0mm}%
+  {-1ex plus -.5ex minus -.2ex}%
+  {0.5ex plus .2ex}%x
+  {\normalfont\large\bfseries}}
+\renewcommand{\subsection}{\@startsection{subsection}{2}{0mm}%
+  {-1explus -.5ex minus -.2ex}%
+  {0.5ex plus .2ex}%
+  {\normalfont\normalsize\bfseries}}
+\renewcommand{\subsubsection}{\@startsection{subsubsection}{3}{0mm}%
+  {-1ex plus -.5ex minus -.2ex}%
+  {1ex plus .2ex}%
+  {\normalfont\small\bfseries}}
+\makeatother
+
+\setcounter{secnumdepth}{0}
+
+\begin{document}
+
+\raggedright
+\footnotesize
+\begin{multicols}{3}
+  \setlength{\premulticols}{1pt}
+  \setlength{\postmulticols}{1pt}
+  \setlength{\multicolsep}{1pt}
+  \setlength{\columnsep}{2pt}
+
+  \include*{vector}
+  \include*{implementation}
+  \include*{distributed}
+  \include*{linkanal}
+  \include*{itemsets}
+  \include*{advanced}
+  \include*{clustering}
+  \include*{classification}
+  \include*{social}
+  \include*{pipeline}
+  \include*{applied}
+  \include*{semantic}
+  \include*{extraction}
+  \include*{graph}
+\end{multicols}
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

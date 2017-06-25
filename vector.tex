@@ -1,0 +1,383 @@
+\section{Vector space retrieval}
+Task of finding relevant document in a collection.
+
+\begin{itemize}
+\item Generating structured representation of documents: feature extraction
+\item Generating structured representation of user needs: query
+  formulation
+\item Matching information needs with informations items:
+  information retrieval model
+\item Efficiency is crucial, collections are big
+\end{itemize}
+
+\subsection{Constituents of documents}
+
+Document content: pixels of an image, text, frames of a video\ldots
+Authors: provides useful information to enhance performance\ldots
+Concepts: general concepts mentionned in a document (can be expliclty
+marked or extracted).
+
+\subsection{Retrieval model}
+
+Determines:
+\begin{itemize}
+
+\item structure of doc representation
+\item structure of query representation
+\item similarity matching function
+
+\end{itemize}
+Relevance:
+\begin{itemize}
+\item determined by similarity matching function
+\item should reflect topics, user needs, recency\ldots
+\item not objective measure
+\end{itemize}
+
+\subsection{Recall and precision}
+
+\texttt{Recall} is the fraction of relevant documents retrieved from
+the all documents.
+
+\texttt{Precision} is the fraction of relevant documents retrieved
+from the the total number retrieved.
+
+\begin{table}[!htp]
+  \centering
+  \label{precision-recall-table}
+  \begin{tabular}{|l|l|l|}
+    \hline
+    & Relevant             & Non-relevant         \\ \hline
+    Retrieved     & True positives (tp)  & False positives (fp) \\ \hline
+    Not-retrieved & False negatives (fn) & True negatives (tn) \\ \hline
+  \end{tabular}
+  \caption{Recall precision}
+\end{table}
+
+\begin{align*}
+  R &= \frac{tp}{tp + fn} = P(retrieved \mid relevant)  \\
+  P &= \frac{tp}{tp + fp} = P(relevant \mid retrieved  \\
+\end{align*}
+
+These two measures do not include rank, all results are considered equally important.
+
+\subsection{Combined measures}
+
+F-measure: weighted harmonic weight
+$$
+F = \frac{1}{\alpha \frac{1}{P} + (1 - \alpha) \frac{1}{R}} \quad \alpha \in [0, 1]
+$$
+
+F1: balanced F-Measure with $ \alpha = \frac{1}{2} \quad F1 = \frac{2 PR}{P + R} $
+
+\subsection{Precision/Recall tradeoff}
+
+P@k = precision of the top-k documents \\
+Interpolated precision: $ P_{int} (R) = \max_{R' \geq R}{R'} $
+
+\subsection{Mean average precision MAP}
+Given a set of queries Q. \\
+For each $ q_j \in Q $ the set of relevant documents $ \{ d_1, d_{m_j} \} $
+$ R_{jk} $ the top k documents for query  $ q_j $. \\
+$ P(R_{jk}) $ precision of result set $ R_{jk} $. \\
+
+$$
+MAP(Q) = \frac{1}{\|Q\|} \sum_{j = 1}^{\|Q\|} \frac{1}{m_j}
+\sum_{k = 1}^{m_j} P(R_{jk})
+$$
+
+\subsection{ROC curve}
+
+Specificity: $ S = \frac{tn}{fp + tn} = P(not retrieved \mid not
+relevant) $ \\
+
+Plot $ 1 - S $ as absciss and R as ordinate. \\
+The steeper the curve rises at the begining the better, the larger the
+area under the curve the better.
+
+\subsection{Full-text retrieval}
+
+Use the words that occur in a text as \texttt{features} for the
+interpretation of the content.
+
+\begin{itemize}
+\item this is called ``full-text'' retrieval.
+\item ignore grammar meaning\ldots
+\item Document structure layout and metadata can be useful too.
+\end{itemize}
+
+Architecture of and IR system:
+\begin{itemize}
+\item feature extraction component: text processing to turn documents
+  and queries into a keyword-based representation
+\item ranking system: it implements the retrieval model, transforms
+  user queries, retrieves documents and finally computes similarity
+  values.
+\item data access system: supports the ranking system by allowing to
+  efficiently retrieve documents containing specific
+  keywords. Standard technique is called \texttt{inverted files}.
+\end{itemize}
+
+Concepts and notations:
+
+Document d: expresses ideas about some topic in a natural language \\
+Query q: expresses an information need \\
+Index term: a semantic unit, a word, short phrase\ldots
+Database DB: collection of $n$ documents $ d_j \in DB, \quad j =
+1,\ldots,n $
+Vocabulary t: collection of $m$ index terms $ k_i \in T, i = 1,\ldots,m$
+
+A document is represented by a set of index terms $ k_i $ \\
+The importance of an index term $k_i$ for the meaning of document $
+d_j $ is represented by a weight $ w_{ij} $; we write $ d_j = (w_{1j},
+\ldots, d_{mj})$ \\
+The IR system assigns a similarity coefficient $ sim(q, d_j) $ as an
+estimate for the relevance of document $ d_j \in DB $ for query q.
+
+The term document matrix contains the index words used as rows and the
+document as columns. $ m_{ij} $ contains the weight of word $ i $ in
+document $ j $. It indicates how relevant a term is for a given
+document.
+
+\subsection{Boolean retrieval}
+
+Queries are only specification of which words a document should
+contain to be relevant. \\
+Language: \\
+expr ::= term | (expr) | NOT expr | expr AND expr | expr OR expr
+
+Similarity computation: \\
+Transform the query to disjunctive normal form:
+\begin{flalign*}
+  q &= ct_1 \text{ OR } \ldots \text{ OR } ct_l & \\
+  \text{ where } ct &= t_1 \text{ AND \ldots AND } t_k  &\\
+  \text{ and } t_i \in \{t, NOT t\} &\\
+  \forall ct_i \text{ create its weight vector } vec(ct) \\
+  vec(ct) &= (w_1, \ldots, w_m) \\
+  w_i &= 1 \quad \text{if } k_i \in ct \\
+  w_i &= -1 \quad \text{if NOT } k_i \in ct \\
+  w_i &= 0 \quad \text{otherwise}
+\end{flalign*}
+If one weight vector of a conjunctive term $ ct $ in q matches
+the document weight vector
+$ d_j = (w_{1j}, \ldots, w_{mj}) $ then document $ d_j $ is
+relevant, i.e.:
+\begin{align*}
+  sim(d_j, q) = 1 \\
+  vec(ct) \text{ matches } d_j \text{ if:}\\
+  w_i &= 1 \land w_ij = 1 \\
+  w_i &= -1 \land w_ij = 0
+\end{align*}
+
+A match is established if the document vector $ d_j $ contains
+all the terms of the query vector, i.e. if the term occurs positively in
+the query the document has to contain the term and vice-versa.
+
+\subsection{Vector space retrieval}
+Limitations of boolean retrieval:
+\begin{itemize}
+\item No rankings: problems with large result set
+\item Queries are difficul to formulate
+\item No tolerance for error
+\item Queries either return too many result or none at all
+\end{itemize}
+
+Key ideas of VS retrieval:
+\begin{itemize}
+\item represent both the document and the query vector by a weight
+  vector in the m-dimensional keyword space assigning non binary weights
+\item determine their distance in the m-dimensional keyword space
+\end{itemize}
+
+Properties:
+\begin{itemize}
+\item Rankings of document according to similarity values
+\item Documents can be retrieved even if they miss some keyword
+\end{itemize}
+Today's standard!
+\\ Similarity computation:
+\begin{align*}
+  \vec{d_j} &= (w_{1j}, \ldots, w_{mj}), \, w_{ij} > 0 \quad \text{if } k_i \in d_j \\
+  \vec{q} & = (w_{1q}, \ldots, w_{mq}), \, w_{iq} > 0 \\
+            & sim(\vec{q}, \vec{d_j}) = \cos{\theta} = \frac{\vec{d_j} \cdot \vec{q}}{\| \vec{d_j} \| \vec{q} \|}
+              = \frac{\sum_{i = 1}{m} w_{ij} w_{iq}}{\|\vec{d_j}\| \|\vec{q} \|} \\
+  \| v \| &= \sqrt{\sum_{i = 1}^{m} v_i^2}
+\end{align*}
+Since $ w_ij > 0 $ and $ w_iq \geq 0 $, $ 0 \leq sim(q, d_j) \leq 1 $.
+The distance measure for vectors has to satisy these properties:
+\begin{itemize}
+\item If two vectors coincide completely their similarity is 1
+\item If two vectors have no keywords in common, their similarity
+  should be minimal, i.e. 0.
+\item In all other cases similarity is $ 0 < s < 1 $.
+\end{itemize}
+
+\subsection{Term frequency}
+Documents are similar if they contains the same keywords.
+
+Normalized term frequency of term $ k_i $ in document $ d_j $
+
+$ tf(i, j) = \frac{freq(i, j)}{\max_{k \in T} freq(k, j)} $
+
+The term frequency is normalized to obtain frequencies between 0 and
+1.
+
+\subsection{Inverse document frequency}
+
+$ ifd(i) = log(\frac{n}{n_i}) \in [0, \, log(n)] $
+
+$ n_i =  $ number of documents in which $ k_i $ occurs
+It is the amount of information associated with the term $ k_i $.
+
+Term weight: $ w_ij = tf(i, j) \times idf(i) $
+
+Thus we do not only take into acouunt the frequency of the term inside
+a document but also the discriminative power of the term with respect
+to the document collection. For that purpose the IDF is computed and
+included in the term weight. The inverse document frequency of a term
+can be increased by adding a document that does not contain the term.
+
+\subsection{Query weights}
+
+$ w_{iq} = \frac{freq(i, q)}{max_{k \in T} freq(k, q)}
+log(\frac{n}{n_i})$
+
+Example: Query q = (information, retrieval)
+- Query vector: $ (log(2), 0, 0) $
+- Scores:
+\begin{align*}
+  &sim(q, D1) = 0.569 \\
+  &sim(q, D2) = 0 \\
+  &sim(q, D3) = 0.254 \\
+  &sim(q, D4) = 0
+\end{align*}
+
+\subsection{Discussion of vector space model}
+
+Advantages:
+\begin{itemize}
+\item term-weighting improves the quality of the answer set
+\item partial matching allows retrieval of docs that approximate the
+  query conditions
+\item cosine ranking formula sorts documents according to degree of
+  similarity to the query
+\end{itemize}
+
+Disadvantages:
+\begin{itemize}
+\item assumes independence of index terms; not clear it is a
+  disadvantage
+\item no justification of why it works!
+\end{itemize}
+
+\subsection{Probabilistic information retrieval}
+
+The notion of similarity in the vector space model does not directly
+imply relevance:
+\begin{itemize}
+\item the highest ranking result might be meaningless
+\item the similarity values have no meaning, they are juste used for
+  ranking
+\end{itemize}
+Probabilistic IR attemps to model relevance as a probability.
+
+\subsubsection{Query likelihood model}
+Given query q determine the probability $ P(d \mid q) $ that document
+$ d $ is relevant to query $ q $.\\
+Assumptions:
+\begin{itemize}
+\item $ P(d) $, the probability of a document occuring is uniform
+  accross a collection
+\item $ P(q) $ is the same for all documents
+\end{itemize}
+Bayes Rule $ P(d \mid q) = \frac{P(q \mid d) P(d)}{P(q)} $
+We want to determine $ P(q \mid d) $ (query likelihood).
+
+\subsubsection{Language modeling}
+Assume each document is generated by a language model $ M_d $.
+Then computing $ P(q \mid d) $ can be interpreted as the probability
+that the query $ q $ was generated by the language model $ M_d $.
+
+A language model is a process that produces text, and a given document
+is assumed to be produced by its specific language model $ M_d $. The
+problem is then viewed as follows: if a query is relevant to a
+document, it should have been produced by the same language model as
+the document. The query likelihood then corresponds to the probability
+that the query has been produced by the same language model as the
+document.
+
+\texttt{What is a language model?}
+
+A language model is a deterministic automaton = grammar.
+Instead of using a deterministic automaton, we can also use a
+probabilistic state automaton, in other words, a Markov process. In
+the simplest case the automaton has a single state, and every state
+transition emits with a certain probability one term out of the
+vocabulary. The automaton can also stop with a certain probability.
+
+\texttt{Probability to create a query}
+
+Example: q = the frog said dog STOP
+$ P(q \mid M1) = 0.2 * 0.03 * 0.02 * 0.01 * 0.2 $ \\
+
+So retrieval becomes the problem of computing for a query q the
+probability $ P(q \mid M_d) $ for all the documents d.
+
+\texttt{Learning and using the model}
+
+MLE of probabilities under unigram Model
+
+$$
+P_{mle}(t \mid M_d) = \frac{tf_{t,d}}{L_d}
+$$
+where
+\begin{itemize}
+\item $ tf_{t,d} $ is the number of occurences of t in d (term
+  frequency)
+\item $ L_d $ is the number of terms in the document (length)
+\end{itemize}
+
+\texttt{Using the model}
+\begin{align*}
+  P(q \mid M_d) = \prod_{t \in q} P_{mle}(t \mid M_d)
+\end{align*}
+
+\subsection{Issues with MLE estimation}
+Problem 1: if a query contains a term not occuring in the document $
+P(q \mid M_d) = 0 $! \\
+
+\subsection{Smoothing}
+Idea: add a small weight for non-occuring terms in a document, that is
+smaller than the collection frequency:
+
+$ P(q \mid M_d) \leq \frac{cf_t}{T} $
+
+$ cf_t $ = number of times term t occurs in collection \\
+$ T $ = total number of terms in collection
+
+Smoothed estimate
+
+$ P(t \mid d) = \lambda P_{mle} (t \mid M_d) + (1 - \lambda) P_{mle}
+)(t \mid M_c) $
+
+$ M_c $ = language model over whole collection
+$ \lambda $ = tuning parameter
+
+\subsection{Probabilistic retrieval}
+
+With smoothing the relevance is computed as
+$ P(d \mid q) \propto P(d) \prod ((1 - \lambda) P(t \mid M_c) +
+\lambda P(t \mid M_d)) $
+
+From a technical perspective the probabilites are computed used term
+frequencies, thus equivalent to vector space retrieval. These systems generally have better performance:
+\begin{itemize}
+\item But parameter tuning ($ \lambda $) is critical
+\item $ \lambda $ can be query-dependent, e.g.\ query size
+\end{itemize}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "master"
+%%% End:

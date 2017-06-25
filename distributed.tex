@@ -1,0 +1,53 @@
+\section{Distributed retrieval}
+\subsection{Retrieval processing}
+
+\textbf{Centralized retrieval}
+\begin{itemize}
+\item Aggregate the weights for ALL documents by scanning the posting
+  lists of the query terms
+\item Scanning is relatively efficient
+\item Computationally quite expensive (memory, processing)
+\end{itemize}
+
+\textbf{Distributed retrieval}
+\begin{itemize}
+\item Posting lists for different terms stored on different nodes
+\item The transfer of complete postings lists can become prohibitively
+  in terms of bandwith consumption
+\end{itemize}
+Is it necessary to transfer the complete posting list to identify the
+top-k documents?
+
+\subsection{Fagin's algorithm}
+Entries in posting lists are sorted according to the tf-idf weights
+\begin{itemize}
+\item Scan in parrallel all lists in round-robin till k documents are
+  detected that occurs in all lists
+\item lookup the missing weights for documents that have not been seen
+  in all lists
+\item select the top-k elements
+\end{itemize}
+This probably returns the top-k documents.
+
+\textbf{Discussion}
+\begin{itemize}
+\item $ O(\sqrt{k n}) $ entries are read in each list for n
+  documents
+\item Assuming that entries are uncorelated
+\end{itemize}
+
+In distributed settings optimizations to reduce the number of
+roundtrips: send a longer prefix of one list to the other node
+Useful for many applications:
+\begin{itemize}
+\item multimedia, image retrieval
+\item Top-k processing in relational databases
+\item Document filtering
+\item Sensor data processing
+\end{itemize}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "master"
+%%% End:

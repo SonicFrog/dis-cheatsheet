@@ -1,0 +1,229 @@
+\section{Clustering}
+
+Given a dataset of \texttt{objects} described by \texttt{attributes},
+build a model that assigns objects to a \texttt{class} (or
+\texttt{label}).
+
+A descriptive modeling, such as \textbf{clustering}, produces
+classes, which are not known in advance. For doing this it relies on
+some criteria that specify when two data items probably belong to the
+same class. Such a criteria is usually based on a similarity measure.
+
+A predictive modeling technique, such as classification, starts from a
+given classification of data items. Using that classification, it
+infers conditions on the properties of the data objects, that allow to
+predict the membership to a specific class.
+
+\subsection{Clustering}
+Partition a set of objects into clusters
+\begin{itemize}
+\item Objects that belong to the same cluster are similar
+\item Objects that belong to different cluster are dissimilar
+\end{itemize}
+
+Clustering is an \texttt{unsupervised} machine learning method.
+Objects do not have class information.
+
+\subsubsection{Usage of clustering}
+\begin{itemize}
+\item Information retrieval
+  \quad - $ C_1 $: relevant to query, $ C_2, C_3 $: not relevant
+\item Web content classification
+  \quad - $ C_1 $: sport, $ C_2 $: politics, $ C_3 $: economics
+\item Customer behaviour analysis
+  \quad - $ C_1 $: diapers beer buyers, $ C_2 $: Fri afternoon buyers
+\end{itemize}
+\textbf{Formal specification} \\
+Given a database $ D $ with $ n $ data items described by $ d $
+attributes: \\
+Find a partition of $ D $ into $ k $ clusters, s.t.\
+\texttt{Intra-cluster} similarity is high and \texttt{Inter-cluster}
+similarity is low.
+
+\subsubsection{Characteristics of clustering methods}
+
+\textbf{Quantitative}
+\begin{itemize}
+\item Scalability: high n
+\item Dimensionalitity: high d
+\end{itemize}
+
+\textbf{Qualitative}
+\begin{itemize}
+\item Different types of attributes (numerical, categorical, \ldots)
+\item Types of shapes
+\end{itemize}
+
+\textbf{Robustness}
+\begin{itemize}
+\item Sensitivity to noise and outliers
+\item Sentitivity to processing order
+\end{itemize}
+
+\textbf{User interaction}
+\begin{itemize}
+\item Incorporation of user constraints (number of clusters, max size,
+  \ldots)
+\item Interpretability and usability
+\end{itemize}
+
+\subsection{Partitioning methods}
+Optimal algorithm: enumerate all partitions and pick the best. \\
+Heuristic algorithms
+\begin{itemize}
+\item \textbf{K-means}: cluster represented by \textbf{point}
+  whose mean distance with the objects in the cluster is minimal
+\item \textbf{K-medoids}: cluster is represented by the
+  \textbf{object} whose mean distance with the objects in the cluster
+  is minimal
+\item \textbf{K-medians}: cluster represented by \textbf{point} whose
+  \texttt{median}  distance with all objects in cluster is minimal
+\end{itemize}
+
+\subsubsection{Score function}
+
+Given database D of n objects, split D into k sets $ C_1, \ldots, C_k
+$ s.t.\ $ C_i \cap C_j = \emptyset \forall C_i \neq C_j $ and $ \cup_i
+C_i = D $. \\
+
+Score function: find $ C_i $ that minimises cost function J
+
+$ J = \frac{1}{n} \sum_{i=1}^k \sum_{x_j \in C_i} \|x_j - \omega_i
+\|^2, \omega_i = \frac{1}{\mid C_i \mid} \sum_{x_j \in C_i} x_j $ \\
+
+$ \omega_i $ = centroid of $ C_i $
+
+\subsection{K-means algorithm}
+Initialise k random point as \textbf{cluster centers}.
+Assign each object to the nearest cluster center.
+
+While partitioning changes
+\begin{itemize}
+\item for each cluster, calculate the centroid of the points and set
+  it as new cluster
+\item assign each point to the nearest cluster center
+\end{itemize}
+
+\subsubsection{Characteritics of k-means}
+Advantages
+\begin{itemize}
+\item Efficient: $ O(tkn) $
+\item n is \#objects, k is \#clusters, t is \#iterations
+\item Converges fast
+\end{itemize}
+Disadvantages
+\begin{itemize}
+\item Often terminate at local optimum
+\item Needs a distance function!
+\item Needs to specify k in advance
+\item does not handle noisy data and outliers
+\item clusters only have convex shape!
+\end{itemize}
+
+\subsubsection{K-means for categorical attributes}
+Needs a distance function to compute the mean. \\
+\textbf{Matching coefficient} for categorical attributes \\
+distance = \# pair-wise mismatches / \#features
+
+\subsubsection{Choosing parameter k for K-means}
+Needs to specifiy k in advance
+\begin{itemize}
+\item exec for $ k = 1, 2, 3, \ldots $
+\item Plot the score J against k
+\item Pick k s.t.\ $ J(k) \sim J(k+1) $
+\end{itemize}
+
+\subsection{Advanced clustering}
+Distance measures for mixed attributes \\
+Other methods
+\begin{itemize}
+\item Density-based clustering
+\item Hierarchical clustering
+\item Online incremental clustering
+\end{itemize}
+
+\subsection{Density based clustering - DBSCAN}
+
+Based on a local, density-based criterion
+Properties
+\begin{itemize}
+\item Discovers clusters of arbitrary shape
+\item Handles noise
+\item Clusters in one scan
+\item Model parameters = density parameters
+\end{itemize}
+
+\subsubsection{Basic notions}
+We assume a distance metric d is given\\
+\textbf{$ \sigma $-neighborhood}: $ N_\sigma (q) = \{p \mid d(p, q) <
+\sigma \}$. A point q is a \textbf{core point} if $ \mid N_\sigma (q)
+\mid \geq \omega $. \\
+
+$ \sigma $ and $ \omega $ are model parameters
+
+\subsubsection{Directly density-reachable}
+A point p is \textbf{directly density-reachable} from q if \\
+$ p \in N_\sigma(q) $ and $ \mid N_\sigma (q) \mid \geq \omega $ \\
+A point that is directly density-reachable but not a core point is a
+\textbf{border point}. \\
+A point that is not directly density-reachable is an \textbf{outlier}.
+
+Direct-density reachability induces a \textbf{directed graph} on the
+points.
+
+A point p is \textbf{density-reachable} from a point q with $ \sigma,
+\omega $ if there is a chain of points $ p_1, \ldots, p_n, p_1 = q,
+p_n = p $ s.t.\ $ p_{i + 1} $ is directly density-reachable from $ p_i
+$. \textbf{Asymmetric relation}. \\
+
+A point p is \textbf{density-connected} to a point q with $\ sigma,
+\omega $ if there is a point r s.t.\ both, p and q are
+density-reachable from r with $ \sigma, \omega $. \textbf{Symmetric
+  relation}.
+
+\subsection{Clusters and noise}
+Definition: a \textbf{cluster} C satisfies
+\begin{itemize}
+\item \textbf{Maximality}: if $ q \in C $ is a core point, and p is
+  density-reachable from q, then also $ p \in C $
+\item \textbf{Connectivity}: any two points in C must be density
+  connected
+\end{itemize}
+
+Properties
+\begin{itemize}
+\item Connectivity $ \rightarrow $ cluster contains at least one core
+  point
+\item The set of clusters is unique
+\item Clusters are not necessarily disjoint
+\end{itemize}
+
+\subsection{DBSCAN: Initialization}
+Construct a directed graph $ G $ using direct density-reachability
+\begin{itemize}
+\item $ V_{core} = $ set of core points
+\item $ P $ = set of all points
+\item $ C = \emptyset $ set of clusters
+\end{itemize}
+
+\subsection{Cluster construction}
+while ($ V_{core} \neq \emptyset$)
+\begin{itemize}
+\item select a point $ p \in V_core $ and construct $S(p)$ the set of
+  all density-reachable from $ p $: breadth-first search on $ G $
+  starting from $ p $
+\item $ C = C \cup \{ S(p) \} $
+\item $ P = P \setminus S(p) $
+\item $ V_{core} = V_{core} \setminus S_{core} (p) $, where
+  $ S_{core}(p) $ = core points in $ S(p) $
+\end{itemize}
+
+Mark remaining points in P as unclustered
+
+\subsection{DBSCAN complexity}
+Construction of directed graph $ O(n^2) $ \\
+Construction of clusters: $ O(n^2) $
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "master"
+%%% End:

@@ -1,0 +1,311 @@
+\section{Link analysis}
+\subsection{Indexing anchor text}
+
+Anchor text is loosely defined as the text surrounding a hyperlink.
+Anchor text may contain a lot of additional content on the referred
+page. \textbf{It might be a better description of the page than the
+  page content itself!}
+It can also lead to unexpected effects, e.g.\ , easily
+\textbf{spammable}.
+
+\subsubsection{Scoring of anchor text}
+Can score anchor text with weight depending on the authority of the
+anchor page's website.
+If we assume yahoo.com is authoritative, then trust (more) the anchor
+text from them.
+Can score anchor text in from other sites higher than local.
+
+\subsection{PageRank}
+
+\subsubsection{Citation analysis}
+\textbf{Bibliometry}: analysis of citations in science publication
+\begin{itemize}
+\item Citation frequency: how important is a paper of author
+\item Co-citation analysis: articles that co-cite the same articles
+  are related
+\item Citation indexing: who is this author cited by?
+\item Authority of sources: impact factor of journals
+\end{itemize}
+
+Full text retrieval result with equal ranking, link analysis allows a
+differentiation:
+\begin{itemize}
+\item relevance related to number of referrals (incomgin links)
+\item relevance related to number of referrals with high relevance
+\end{itemize}
+
+\subsubsection{Link spamming}
+Millions of participants, spamming is widespread
+Once search engines began to use link for ranking, link spam grew.
+
+\subsection{Link-based scoring}
+Imagine a user doing a random walk on web pages:
+\begin{itemize}
+\item start at random page
+\item at each step, go out of the current page along one of the
+  links on that page equiprobably
+\item At a dead end, jump to a random web page
+\item At any non-dead end, jump to random web page with some
+  probability
+\item Now we cannot get stuck locally, there is a long-term rate at
+  which any page is visited
+\end{itemize}
+In the long run each page has a long-term visit rate - use this as the
+page's score.
+
+\subsubsection{Random walker model}
+\begin{itemize}
+\item if a random walker visits a page more often it is more relevant
+\item takes into account the number of referrals AND the relevance of
+  referrals
+\end{itemize}
+
+$ P(p_i) = \sum_{p_j \mid p_j \rightarrow p_i} \frac{P(p_j)}{C_(p_j)}
+$
+
+$ N $ is the number of pages \\
+$ C(p) $ is the number of outgoing links of page p \\
+$ P(p_i) $ probability to visit $ p_i $, where page $ p_i $ is pointed to by
+$ p_1 $ to $ p_N $ = \textbf{relevance}
+
+\textbf{Transition matrix for random walker}
+
+The definition of $ P(p_i) $ can be reformulated as matrix equation.
+
+\begin{align*}
+  & R_{ij} = \begin{cases}
+    \frac{1}{C(p_j), \, \text{if } p_j \rightarrow p_i} \\
+    0, \, otherwise
+  \end{cases}
+  & \vec{p} = (P(p_1), \ldots, P(p_n)) \\
+  & \vec{p} = R \cdot \vec{p}, \, \| \vec \| = \sum_{i=1}^{n} p_i = 1
+\end{align*}
+
+\textbf{Teleporting}
+\begin{itemize}
+\item random walker jump with 1 - q to an arbitrary node
+\item thus it can leave dead end and nodes without incoming links
+  are reached
+\item This also avoids the sink of rank problem which can occur with
+  dead ends
+\end{itemize}
+
+\subsection{PageRank method}
+
+\begin{align*}
+  P(p_i) & = c( \frac{(1 - q)}{N} + q \sum_{p_j \mid p_j \rightarrow
+           p_i} \frac{P(p_j)}{C(p_j)}), c \leq 1 \\
+  \vec{p} & = c((q R + (1 - q) E)) \cdot \vec{p}, E = \bigg[
+            \frac{1}{N} \bigg] \\
+  \vec{p} & = c(qR \cdot \vec{p} + \frac{1 - q}{N} \vec{e}), \vec{e} =
+            (1, \ldots, 1)
+\end{align*}
+Find eigenvector of $ c((q R + (1 - q) E)) = c(qR \cdot \vec{p} +
+\frac{1 - q}{N} \vec{e}) $ associated with the biggest
+eigenvalue. This gives the ranking of each page in $ \vec{p} $.
+
+\subsubsection{Practical computation}
+
+Iterative computation
+\begin{align*}
+  \vec{p_0} \leftarrow & \vec{s} \\
+  while\,\delta & > \epsilon \\
+                       & p_{i + 1} \leftarrow qR \cdot \vec{p_i} \\
+                       & \vec{p_{i + 1}} \leftarrow \vec{p_{i + 1}} + \frac{1 - q}{N}
+                         \vec{e} \\
+                       & \delta \leftarrow \| \vec{p_{i + 1}} - \vec{p_i} \|
+\end{align*}
+
+$ \epsilon $: termination criterion \\
+s = arbitrary start vector, e.g.\ $ s = e $
+
+\subsubsection{Web search}
+PageRank is part of the ranking method used by google.
+\begin{itemize}
+\item Compute the global pagerank for all web pages
+\item Given a keyword-based query retrieve a ranked set of documents
+  using standard text retrieval methods
+\item Merge the ranking with the result of PageRank to achive both
+  high precision (text-retrieval) and high quality (PageRank)
+\item Google uses also many other methods to improve ranking
+\end{itemize}
+
+\textbf{Technical challenges}
+\begin{itemize}
+\item Crawling the web
+\item Efficient computation of PageRank for large link databases
+\item Combination with other ranking methods (text)
+\end{itemize}
+
+\subsection{Hyperlink-Induced Topic Search (HITS)}
+Key idea: in response to a query, instead of an ordered list of pages,
+find two sets of inter-related pages:
+\begin{itemize}
+\item \textbf{Hub pages} are good lists of links on a subject
+\item \textbf{Authoritative pages} occur recurrently on good hubs for
+  the subject
+\end{itemize}
+
+Best suited for ``broad topic'' queries rather than for page-finding
+queries.
+
+\subsubsection{Hub-authority ranking}
+
+\begin{itemize}
+\item \textbf{Hubs} are pages that point to many/relevant authorities
+\item \textbf{Authorities} are pages that are pointed to by
+  many/relevant hubs
+\end{itemize}
+
+\textbf{Computing hubs and authorities}: \\
+High level scheme:
+\begin{itemize}
+\item Select a base set N of pages that are likely to contain relevant
+  hubs and authorities
+\item Compute for each page p in the base set a hub score h(p) and an
+  authority score a(p)
+\item Initialize h(p) = 1 and a(p) = 1
+\item Iteratively update h(p) and a(p)
+\item Return the highest scored pages after several iterations
+\end{itemize}
+
+\textbf{Iterative computation}\\
+Repeat the following updates, for all p
+\begin{align*}
+  H(p_i) = \sum_{p_j \in N \mid p_j \rightarrow p_i} A(p_j) \\
+  A(p_i)= \sum_{p_j \in N \mid p_j \rightarrow _pi} H(p_j)
+\end{align*}
+Normalizing values: \\
+$ \sum_{p_j \in N} A(p_j)^2 = 1 \quad \sum_{p_j \in N} H(p_j)^2 = 1 $
+
+\subsubsection{HITS algorithm}
+
+x is authority score \\
+y is hub score \\
+\begin{lstlisting}[language=C, basicstyle=\tiny,mathescape=true]
+  l = 0;
+  (x_0, y_0) = $ \frac{1}{\mid N \mid^2} $((1, ..., 1), (1, ..., 1)));
+  while(l < k) {
+    l = l + 1
+    $ x_l = (\sum_{p_l \in  N \mid p_l
+        \rightarrow p_1} y_{l -  1, 1},\ldots, \sum_{p_i \mid
+        p_i \rightarrow p_{\mid N \mid}} y_{l - 1, \mid N
+        \mid}); $
+    $ y_l = y_{l - 1}; $
+    $ y_l = (\sum_{p_l \in N \mid p_i
+        \rightarrow p_1} x_{l, 1},\ldots, \sum_{p_{\mid N
+        \mid} \in N \mid p_i \rightarrow p_{\mid N \mid}})); $
+        $ (x_l, y_l) \leftarrow (\frac{x_l}{\|x_l\|},
+                 \frac{y_l}{\|y_l\|}); $
+  }
+  return (x_k, y_k)
+\end{lstlisting}
+
+\textbf{Converge of HITS}
+$ n \times n $ link matrix L \\
+Up to normalization:
+\begin{itemize}
+\item $ y = Lx, x = L^t y $, thus
+\item $ y^* $ is an Eigenvector of $ LL^t $
+\item $ x^* $  is an eigenvector of $ L^tL $
+\end{itemize}
+
+\textbf{Obtaining the base set} \\
+Given a query, obtain all the pages mentioning the query and call this
+set, the \textbf{root set} of pages. Add pages that either
+\begin{itemize}
+\item points to a page in the root sets, or
+\item is pointed to by a page in the root set
+\end{itemize}
+Use this as \textbf{base set}.
+
+\subsubsection{HITS conclusion}
+
+Potential issues:
+\begin{itemize}
+\item Topic drift: off-topic page can cause off-topic ``authorities''
+  to be returned
+\item Mutually reinforcing affiliates: clusters of affiliated
+  pages/sites can boost each others' scores
+\end{itemize}
+
+Social Network analysis
+\begin{itemize}
+\item PageRank and HITS are examples of SN analysis algorithm
+\end{itemize}
+
+Implementation
+\begin{itemize}
+\item How to efficiently obtain the base set?
+\end{itemize}
+
+\section{Link indexing}
+
+\subsection{Connectivity server}
+Support for fast queries on web graph
+\begin{itemize}
+\item which urls point to a given urls
+\item which urls does a given url point to
+\end{itemize}
+
+Store mapping in memory from
+\begin{itemize}
+\item URL to outlinks
+\item URL to inlinks
+\end{itemize}
+
+Applications:
+\begin{itemize}
+\item Link analysis (PageRank, HITS)
+\item Web crawl control
+\item Web graph analysis
+\end{itemize}
+
+\subsubsection{Adjacency lists}
+The set of neighbors to a node. Assume URLs sorted in lexicographical
+order. \\
+
+\textbf{Representation of adjacency lists} \\
+Assume each URL represented by an integer:
+\begin{itemize}
+\item For a 4 billion pages web, we 32 bits per node
+\item Naively, this demands 64 bits to represent each hyperlink
+\item For the current web: 320 GB
+\end{itemize}
+
+\textbf{Properties of adjacency lists} \\
+\texttt{Locality}: Most links contained in a page have a navigational
+nature, thus their indices are close in a lexicographical order \\
+
+\begin{itemize}
+\item [\textbf{Similarity}]
+\item Either two lists have almost nothing in common or
+  they share large segments of their sucessor lists
+\item Pages that occur close to each other in lexicographic order tend
+  to have similar lists
+\end{itemize}
+
+\subsubsection{Exploiting locality}
+
+\begin{itemize}
+
+\item $ S(x) = (s_1, \ldots, s_k) $ will be represented as $ (s_1 - x, s_2 - s_1
+  -1, \ldots, s_k - s_{k - 1} - 1) $
+\item Use of varying length encoding
+\end{itemize}
+
+\subsubsection{Exploiting similarity}
+
+\begin{itemize}
+  \item [Copy data from similar lists]
+\item Reference list: reference to another list, searched in a
+  neighboring window of nodes
+\item Copy list: indicate which node is copied from reference list
+\item Extra nodes: additionnal nodes not in reference list
+\end{itemize}
+Result: about 3 bytes/link
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "master"
+%%% End:

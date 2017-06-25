@@ -1,0 +1,57 @@
+\message{ !name(master.tex)}\documentclass[10pt, landscape]{article}
+\usepackage{multicol}
+\usepackage{ifthen}
+\usepackage[landscape]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{newclude}
+
+\usepackage{amsmath,amsthm,amsfonts,amssymb}
+\usepackage{color,graphicx,overpic}
+
+\author{Ogier Bouvier}
+\date {June 2017}
+\title{Distributed Information Systems}
+
+\ifthenelse{\lengthtest { \paperwidth = 11in}}
+{ \geometry{top=.5in,left=.5in,right=.5in,bottom=.5in} }
+{\ifthenelse{ \lengthtest{ \paperwidth = 297mm}}
+  {\geometry{top=1cm,left=1cm,right=1cm,bottom=1cm} }
+  {\geometry{top=1cm,left=1cm,right=1cm,bottom=1cm} }
+}
+
+\pagestyle{empty}
+
+% Redefine section commands to use less space
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{0mm}%
+  {-1ex plus -.5ex minus -.2ex}%
+  {0.5ex plus .2ex}%x
+  {\normalfont\large\bfseries}}
+\renewcommand{\subsection}{\@startsection{subsection}{2}{0mm}%
+  {-1explus -.5ex minus -.2ex}%
+  {0.5ex plus .2ex}%
+  {\normalfont\normalsize\bfseries}}
+\renewcommand{\subsubsection}{\@startsection{subsubsection}{3}{0mm}%
+  {-1ex plus -.5ex minus -.2ex}%
+  {1ex plus .2ex}%
+  {\normalfont\small\bfseries}}
+\makeatother
+
+\setcounter{secnumdepth}{0}
+
+\begin{document}
+
+\message{ !name(extraction.tex) !offset(24) }
+\begin{itemize}
+\item Named entities can be indexed, linked, etc.\
+\end{itemize}
+\message{ !name(master.tex) !offset(17) }
+
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

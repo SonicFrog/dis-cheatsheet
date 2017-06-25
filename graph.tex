@@ -1,0 +1,304 @@
+\section{Graph databases}
+
+\subsection{Taxonomy induction}
+IE: Extract isolated facts from documents \\
+Taxonomy induction: Extract related facts from documents, e.g.\
+classification of animals
+
+\subsection{Use of taxonomies}
+
+Hyponyms can inherit properties from hypernyms
+\begin{itemize}
+\item Due to transitivity of ISA, no need to learn inferred facts
+\end{itemize}
+No unique taxonomies
+\begin{itemize}
+\item Dependening on the perspective and application different
+  taxonomies may be useful
+\end{itemize}
+
+\subsection{Taxonomy induction task}
+Starting from a root concept and a basic concept
+\begin{itemize}
+\item Learn relevant terms and their hypernym/hyponym relationships
+\item Filter out erroneous terms and relations
+\item Induce a taxonomy structure
+\end{itemize}
+
+\subsection{Learning terms}
+
+Template approach
+\begin{itemize}
+\item Given a \textbf{concept c} (e.g.\ animal) and a seed (e.g.\
+  lion)
+\item Hyponym patterns: $ P_i(c, s, X) = c $ such as as s and X
+\item Hypernym patterns: $ P_c(t1, t2, X) = X $ such as $ t_1 $ and $
+  t_2 $
+\end{itemize}
+
+Recursively harvest new terms using a search engine
+\begin{lstlisting}[language=C,mathescape=true]
+T = \{s\}; w(t) = 0;
+while (T changes) {
+    $ \forall t \in T$: submit $ P_i(c, t, X) $ to search engine
+         add to T all new terms $ t_{new} $ found in position X
+         w(t)++
+}
+\end{lstlisting}
+
+\subsection{Learning hypernyms}
+
+\begin{lstlisting}[language=C,mathescape=true]
+C = \{ c \};
+$ \forall t_1, t_2 \in T $ with $ w(t_i) > 0 $:
+    submit $ P_c(t_1, t_2, X) $ to search engine
+    add new term h found in position X to C
+    add $ t_1 $ ISA h and $ t_2 $ ISA h to the \\
+    hypernym relations H
+    $ w(t_1, t_2, h)++ $
+\end{lstlisting}
+
+Filtering
+\begin{itemize}
+\item rank concepts h by $ \sum_{t_1, t_2' w(t_1, t_2, h)}$
+\item keep top concepts
+\end{itemize}
+
+\subsection{Inducing hypernym graph}
+Many possible relationships among concepts and terms have not been
+discovered
+
+\begin{lstlisting}[language=C,mathescape=true]
+$ \forall (t_1, t_2) \in T \cup C $
+
+Construct query $ q_1 = h(t_1, t_2) $and $ q_2 = h(t_2, t_2) $
+with Hearst pattern $ h(X, Y) $
+
+Submit query  to SE and count number of results
+
+if (\#results(q_1) > \#results(q_2))
+then add $ t_1 ISA t_2 $ to H
+else add $ t_2 ISA t_1 $ to H
+\end{lstlisting}
+
+\subsection{Cleaning the hypernym graph}
+\begin{itemize}
+\item Determine all basic concept (not hypernym of another)
+\item Determine all root concept (have no hypernym)
+\item For each basic - root concepts pairs:
+\item Select hypernyms paths that connect them
+\item Choose the longest one for final taxonomy
+\end{itemize}
+
+\subsection{Schema integration}
+
+Integration of heterogeneous data sources
+\begin{itemize}
+\item Every project on Big data analysis has to integrate data from
+  heterogeneous data source
+\item Different schemas, different taxonomies
+\item One of the long-standing open problems in data mgmt
+\end{itemize}
+
+\subsection{Schema matching approaches}
+Manual matching: still common practice
+\textbf{Schema matching tools}
+\begin{itemize}
+\item Based on structural and content features: names, domains,
+  structure, values
+\item Establish correspondences and rank according to quality
+  \begin{itemize}
+  \item Errors are frequent and unavoidable
+  \item Works well for small schemas
+  \end{itemize}
+\end{itemize}
+
+\subsection{The problem}
+Given two (RDF) schemas S1, S2 with (RDF) database D1, D2 \\
+\textbf{Goal}: find a 1:1 matching of schema nodes that have the same
+or similar meaning. \\
+\textbf{Assumption}: two schema nodes (classes)are considered similar
+if they have the same or similar instances
+
+\subsection{Universe of database}
+Universe U is a finite set of possible instances.
+\subsubsection{Similarity of classes}
+A, B are classes, classes are subsets of U.
+Similarity measure (Jaccard similarity):
+$ sim(A, B) = \frac{\mid A \cap B \mid}{\mid A \cup B \mid} =
+\frac{P(x \in A and x \in B)}{P(x \in A or x \in B)} = \frac{P(A,
+  B)}{(P(A, B) + P(\mathsf{A}, B) + P(A, \mathsf{B}))} $ \\
+where $ P(A, B) = P(x \in A and x \in B) $ and $ P(A, \mathsf{B} = P(x
+\in A and x \notin B)) $ etc\ldots
+
+\subsection{Problem 1}
+Same information has structurally different representation!
+
+\subsection{Problem 2}
+Two databases might have
+\begin{itemize}
+\item Classes with similar meaning
+\item Different instances for those classes (e.g.\ different courses
+  at different universities)
+\end{itemize}
+
+\textbf{Intension} is similar but \textbf{extension} is different
+
+\subsection{Complex features of classes}
+Considering the instances (direct children) of classe is only a simple
+class feature. \\
+Many complex features can be exploited
+\begin{itemize}
+\item Names of attributes and relationships
+\item Structural relationsships (data types)
+\item Distributional features (data values)
+\item Content features (e.g.\, text)
+\end{itemize}
+
+We consider as content features the set of terms associated with the
+paths of a node i to the leaves.
+\begin{itemize}
+\item $ T_i = \{t_1, \ldots, t_n \}$ with repeated occurences (bag of
+  words)
+\item $ T_A = \{aberer, information systems, vetterli \}$
+\end{itemize}
+
+\subsubsection{Finding corresponding classes}
+If U1 and U2 are the universe DB1 and DB2 we may assume: $ U1 \cap U2
+= \emptyset $. Thus no way compute P(A, B) directly! \\
+Given $ i \in A $ the question is whether it would be likely that also
+$ i \in B$, even if i is not part of U2
+
+\subsection{Probabilistic approach}
+We want to construct a function that gives the probability for a given
+instance i with feature $ T_i $ to belong to class A. \\
+$ P(A \mid T_i) = P(T_i \mid A)P(A)P(d) \propto P(T_i \mid A)P(A) $ \\
+We want to determine $ P(T_i \mid A) $ and $ P(A) $
+
+\subsubsection{Naîve bayes classifier}
+
+We know $ P(A) = \frac{\mid A \mid}{\mid U_1 \mid}$ \\
+Assume independence: $ P(T_i \mid A) = P(t_1 \mid A) \ldots P(t_n \mid
+A) $ \\
+
+With $ T_A $ being the bag of all terms occuring in all instances of A
+we have: $ P(t \mid A) = \frac{\mid t \in T_A \mid}{\sum_{t'} \mid t'
+  \in T_A \mid} $ \\
+
+$ P(A \mid T_i) $ is a naïve bayes classifier
+
+\subsubsection{Computing similarities between classes A and B}
+\begin{itemize}
+\item Take all instances of U1 and train a classifier to decide
+  whether an instance belongs to A or not
+\item Select all instances in U2 belonging to B: $ U2^B $
+\item Apply the classifier trained with U1 to all instances in $ U2^B
+  $ to produce $ U2^{AB} $
+\item Do the same with A and exchanged
+\item Compute $ P(A, B) = \frac{\mid U1^{AB} \mid + \mid U2^{AB}
+    \mid}{\mid U1 \mid + \mid U2 \mid}$
+\item Compute similarly $ P(A, \mathsf{B} \ldots)$
+\item Then compute for each pair f concepts sim(A, B) using Jaccard similarity
+\end{itemize}
+
+\subsection{Node mapping}
+With the similarity values, alternative class mappings are possible \\
+Naîve approach:
+\begin{itemize}
+\item Order matchings by probability
+\item Choose the most probable matching and produce a mapping among th
+  eclasses
+\item Remove the mapped classes
+\item Choose the next most probable matching and repeat
+\end{itemize}
+
+Drawback
+\begin{itemize}
+\item OBvious consistency constraints may be violated, e.g.\, if all
+  children of a class are mapped then also their parent class should
+  be mapped
+\item More sophisticated mappings algorithms incorporate general and
+  domain-specific constraints
+\end{itemize}
+
+
+\subsection{Networked schema integration}
+
+Data integration networks: different experts may contribute input on
+schema mapping
+
+\subsubsection{Wisdom of the network}
+Instead of considering only one mapping consider the whole network of
+mappings!
+
+\subsection{Pay-as-you-go schema matching}
+\begin{itemize}
+\item Generate a probabilistic matching network: keep all potential
+  mappings and asses probability of correctness
+\item Reduce network uncertainty: request user feedback with minimal
+  effort
+\item Instantiate best matching: select on optimal set of attributes
+  correspondences
+\end{itemize}
+
+\subsection{Matching instances}
+Satisfy consistency constraints
+\begin{itemize}
+\item Uniqueness: an attribute cannot be mapped to two different
+  attributes
+\item Transitivity: if $ a \iff b $ and $ b \iff c $ then also $ a
+  \iff c $
+\item But drop as little knowledge as necessary
+\item Maximal: minimal number of claimed correspondences removed
+\end{itemize}
+
+\subsection{Probability of correctness}
+
+$ p_c $: probability of correctness associated with a correspondence c
+\begin{itemize}
+\item Given all integrity constraints and user feedback on their
+  correctness
+\item Construct the set of matching instances
+\end{itemize}
+
+$ p_c = \frac{\text{\#number of matchin instances that contain
+    c}}{\text{\#total number of matching instances}}$
+
+
+\subsection{Reducing network uncertainty}
+$ H(C) = - \sum_{c \in C} p_c log p_c + (1 - p_c) log(1 - p_c) $
+
+ask users for feedback on correspondences with highest information
+gain first. \\
+Information gain: $ IG(c) = H(c) - H(C \mid c) $
+
+$ H(C \mid c) $: uncertainty when knowing the true value of c
+
+\subsection{Selecting best matching instances}
+After obtaining user feedback, still mulitple solutions might be
+possible \\
+
+Objective: find a matching instance that has
+\begin{itemize}
+\item Minimal repair distance (dropping as few correspondences as
+  possible)
+\item Maximal likelihood: maximal $ \prod_{c \in C} p_c $
+\end{itemize}
+
+\subsection{Results}
+Information gain ordering strategy achieves savings of up to 48\# user
+effort compared to random ordering.
+
+\subsection{Outlook}
+The next frontier:
+\begin{itemize}
+\item Structuring knowledge using machine learning and data mining
+\item Adding valuation (utility) to those models
+\item Automated problem solving
+\item Machines build structured models of the word, just like human do
+\end{itemize}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "master"
+%%% End:

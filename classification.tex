@@ -1,0 +1,267 @@
+\section{Classification}
+\subsection{Classification problem}
+\textbf{Input}: set of objects with attributes and one class label \\
+
+\textbf{Output}: A model that returns the class label given the object
+attributes. Model is a function represented as rules, decision trees,
+\ldots Classification is \texttt{supervised} ML.
+
+\subsection{General approach}
+Model is learnt from a set of objects with known labels:
+\textbf{training set}. Quality is evaluated by comparing the predicted
+labels with known objects: \textbf{test set}. The two sets must be
+independent or over-fitting occurs. Model then applied to data with
+unknown label: \textbf{prediction}.
+
+\subsection{Problem formulation}
+Given a database D with n data items described by d attributes and one
+categorical attributes (class label C). \\
+Find a function f: $ X^d \rightarrow C $ rules, decision tree, formula \\
+Such that it
+\begin{itemize}
+\item classifies \textit{accurately} the items in \textit{training
+    set}
+\item \textit{{generalises}} well for the items in \textit{test set}
+\end{itemize}
+
+\subsection{Characteristics}
+Predictive accuracy \\
+Speed and scalability
+\begin{itemize}
+\item Time to build model
+\item Time to use model
+\item In memory vs.\ on disk processing
+\end{itemize}
+Robustness: handling noise, outliers, missing values
+Interpretability
+\begin{itemize}
+\item Understading the model and its decisions (whitebox) vs.\ white
+  box
+\item Compactness of model
+\end{itemize}
+
+\subsection{Decision tree induction}
+Properties: \\
+flow-chart like tree-structure
+\begin{itemize}
+\item Nodes are tests on a single-attribute
+\item Branches are attributes values
+\item Leaves are marked with class labels
+\end{itemize}
+Score function: classification accuracy. \\
+Optimisation: top-down tree construction + pruning
+
+\subsection{Decision tree algorithm}
+Tree construction (top-down divide and conquer)
+\begin{itemize}
+\item All training samples belong to the root
+\item Partitioned recursively on ``most discriminative'' attributes
+\item Discriminative power based on information gain
+\end{itemize}
+Partitioning stops if
+\begin{itemize}
+\item All samples belong to same calss $ \rightarrow $ assign the
+  class label to leaf
+\item There are no attributes left $ \rightarrow $ majority voting to
+  assign class label to leaf
+\item There are no samples left
+\end{itemize}
+
+\subsection{Attribute selection}
+At a given branch, the set of samples S to be classified has P
+positive and N negative instances. \\
+The entropy in S is \\
+$ H(P, N) = - \frac{P}{P + N} log_2 \frac{P}{P + N} - \frac{N}{P + N}
+log_2 \frac{N}{P + N} $ \\
+Note
+\begin{itemize}
+\item If $ P = 0 $ or $ N = 0 $ \quad $ H(P, N) = 0 \rightarrow $ no
+  doubt
+\item If $ P = N $ \quad $ H(P, N) = 1 \rightarrow $ max doubt
+\end{itemize}
+
+\subsection{Information gain}
+Attribute A partition S into $ S_1, S_2, \ldots, S_v $ \\
+Entropy of A is \\
+$ H(A) = \sum_{i = 1}^v \frac{P_i + N_i}{P + N} H(P_i, N_i) $ \\
+
+The information gain obtained by splitting S using A is \\
+$ Gain(A) = H(P, N) - H(A) $
+
+\subsection{Pruning}
+The construction phase does not filter out noise $ \rightarrow $
+\textbf{overfitting}. \\
+Pruning strategies
+\begin{itemize}
+\item Stop partitioning a node when large majority of sample is
+  positive or negative
+\item Build the full tree, then replace nodes with leaves labelled
+  with the majority class, if accuracy does not change
+\item Apply Minimum Description Length (MDL) principle
+\end{itemize}
+
+\subsection{MDL Pruning}
+Let $ M_1, M_2, \ldots, M_n $ be a list of candidate models (i.e.\
+trees). The best model is the one that minimizes \\
+$ L(M) + L(D \mid M) $ \\
+where
+\begin{itemize}
+\item $ L(M) $ is the length in bits of the description of the model
+  (\#nodes, \#leaves, \#arcs, \ldots)
+\item $ L(D \mid M) $ is the length in bits of the description of the
+  data when encoded with the models (\#misclassifications)
+\end{itemize}
+
+\subsection{Extracting rules from trees}
+Represent the knowledge in form of IF-THEN rules
+\begin{itemize}
+\item One rule is created for each path from the root to a leaf
+\item Each attribute-value pari along a path forms a conjunction
+\item The leaf node holds the class prediction
+\end{itemize}
+Rules are easier for humans to understand!
+
+\subsection{Decision tree: continuous attributes}
+With continuous attributes we cannot have a separate branch for each
+values. Use \textbf{binary decision trees}.
+\begin{itemize}
+\item For continuous attributes A, a split is defined by $ val(A) < X
+  $
+\item For categorical attributes A, a split is defined by a subset $ X
+  \subseteq domain(A) $
+\end{itemize}
+
+\subsubsection{Splitting continuous attributes}
+\begin{itemize}
+\item Sort the data according to attribute value
+\item Determine the value of X which maximizes information gain by
+  scanning data items
+\end{itemize}
+Only a relevant decision point if the class label changes
+
+\subsection{Scalability of continuous attribute splits}
+Naive
+\begin{itemize}
+\item At each step the data set is split in subsets that are
+  associated with a tree node
+\end{itemize}
+Problem
+\begin{itemize}
+\item for evaluating which attribute to split data, needs to be sorted
+  by these attributes
+\item Becomes dominating cost
+\end{itemize}
+
+Presorting of data and preservation of order through
+construction. Requires separate sorted attributes tables for each
+attribute. \\
+Updating attributes tables
+\begin{itemize}
+\item Attribute used for split: split table
+\item Other attributes
+  \begin{itemize}
+  \item Build hash table associating tuple identifiers of data items
+    with partition
+  \item Select data from other attributes tables by scanning and
+    probing the hash table
+  \end{itemize}
+\end{itemize}
+
+\subsection{Characteristics of decision tree}
+Strengths
+\begin{itemize}
+\item Automatic feature selection
+\item Minimal data preparation
+\item Non-linear
+\item Easy to interpret and explain
+\end{itemize}
+Weaknesses
+\begin{itemize}
+\item Sensitive to small perturbations
+\item Tend to overfit
+\item Have to be re-train with new data
+\end{itemize}
+
+\subsection{Classification algorithms}
+Alternatives
+\begin{itemize}
+\item Basic: Naïve bayes, kNN, logistic regression, \ldots
+\item Ensemble: random forest, gradient boosting
+\item Support vector machines
+\item Neural networks: CNN, rNN, LSTM
+\end{itemize}
+
+\subsection{Ensemble methods}
+\begin{itemize}
+\item Take a collection of weak learners
+\item Combine their results to make a single strong learners
+\end{itemize}
+
+Types
+\begin{itemize}
+\item \textbf{Bagging}: train learners in parrallel on different
+  samples then combine outputs through voting or averaging
+\item \textbf{Stacking}: combine model outputs using a second-stage
+  learner like linear regression
+\item \textbf{Boosting}: train learners on the filtered outputs of
+  other learners
+\end{itemize}
+
+\subsection{Random forests}
+Learn K different decision trees from independent samples. Vote
+between different learners. Aggregate by majority vote.
+
+\subsection{Why it works}
+Assume 25 base classifiers with error rate $ \epsilon = 0.35 $ \\
+Assume they are independent \\
+Probability of wrong ensemble classification: \\
+$ P(wrong) = \sum_{i=13} \binom{25}{i} \epsilon^i (1 - \epsilon)^{25 -
+i} = 0.06 $
+
+\subsection{Sampling strategies}
+
+\begin{itemize}
+\item Sampling data: select a subset of the data $ \rightarrow $ each
+  tree is trained on different data
+\item Sampling attributes: select a subset of attributes $ \rightarrow
+  $ corresponding nodes in different trees (usually) don't use the
+  same feature to split
+\end{itemize}
+
+\subsection{Random forest: algorithm}
+\begin{itemize}
+\item Draw k samples of size N from dataset
+\item While constructing the decision tree, select a random set of
+  \textbf{m attributes} out of the p attributes to infer split
+  (feature bagging)
+\end{itemize}
+Typical parameters:
+\begin{itemize}
+\item $ m \approx \sqrt(p) $, or smaller
+\item $ K \approx 500 $
+\end{itemize}
+
+\subsection{Characteristics of random forests}
+Strengths
+\begin{itemize}
+\item Ensembles can model extremely complex decision boundaries
+  without overfitting
+\item Probably the most popular classifier for \textbf{dense data} ($
+  \leq $ a few thousands features)
+\item Easy to implement (train a lot of trees)
+\item Parallelizes easily, good for map-reduce
+\end{itemize}
+Weaknesses
+\begin{itemize}
+\item Deep neural networks generally do better and sometimes even
+  gradient boosted trees
+\item Needs many passes over the data - at least the max depth of the
+  trees
+\item Relatively easy to overfit - hard to balance accuracy/fit
+  tradeoff
+\end{itemize}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "master"
+%%% End:
